@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../providers/products_provider.dart';
 import '../providers/cart.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/products_grid.dart';
 import '../widgets/badge.dart';
 import './cart_screen.dart';
-
 
 enum FilterOptions {
   Favourites,
@@ -20,6 +20,34 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _showOnlyFavourites = false;
+  var _isInit = true;
+  var _isLoading = true;
+
+  @override
+  void initState() {
+    // Provider.of<ProductProvider>(context).fetchAndSetProducts(); // Won't WORK !!
+    // Future.delayed(Duration.zero).then((value) {
+    //   Provider.of<ProductProvider>(context).fetchAndSetProducts();
+    // });  //---  ALSO NOT PROPER
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      setState(() {
+        _isLoading = true;
+      });
+      Provider.of<ProductProvider>(context).fetchAndSetProducts().then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+    _isInit = false;
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,7 +73,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           ),
           Consumer<Cart>(
             builder: (context, cart, child) =>
-                Badge(child: child,value: cart.itemCount.toString()),
+                Badge(child: child, value: cart.itemCount.toString()),
             child: IconButton(
               icon: Icon(Icons.shopping_cart),
               onPressed: () {
@@ -56,7 +84,11 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: ProductsGrid(_showOnlyFavourites),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : ProductsGrid(_showOnlyFavourites),
     );
   }
 }
