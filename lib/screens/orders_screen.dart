@@ -10,7 +10,7 @@ class OrdersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final orderData = Provider.of<Orders>(context);
+    //final orderData = Provider.of<Orders>(context);
     return Scaffold(
         appBar: AppBar(
           title: Text("Your Orders"),
@@ -31,11 +31,11 @@ class OrdersScreen extends StatelessWidget {
                   child: Text('An Error occurd !'),
                 );
               } else {
-                return Consumer<Orders>(builder: (ctx, orderData,child) {
-                  return ListView.builder(
-                      itemCount: orderData.orders.length,
-                      itemBuilder: (ctx, i) => OrderItem(orderData.orders[i]));
-                });
+                return Consumer<Orders>(
+                    builder: (ctx, orderData, child) => ListView.builder(
+                        itemCount: orderData.orders.length,
+                        itemBuilder: (ctx, index) =>
+                            OrderItem(orderData.orders[index])));
               }
             }
           },

@@ -19,6 +19,8 @@ class _OrderItemState extends State<OrderItem> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.order);
+    print(widget.order.products.length);
     return Card(
       margin: EdgeInsets.all(10),
       child: Column(
@@ -42,9 +44,7 @@ class _OrderItemState extends State<OrderItem> {
               padding: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
               height: min(widget.order.products.length * 20.0 + 10, 100),
               child: ListView(
-                children: widget.order.products
-                    .map(
-                      (prod) => Row(
+                children: widget.order.products.map((prod) => Row(  // Here prod is does not contain anything unfortunately
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text(
@@ -55,15 +55,14 @@ class _OrderItemState extends State<OrderItem> {
                         ),
                       ),
                       Text(
-                        '${prod.quantity}x \$${prod.price}',
+                        '${prod.quantity} x \$${prod.price}',
                         style: TextStyle(
                           fontSize: 18,
                           color: Colors.grey,
                         ),
                       )
                     ],
-                  ),
-                ).toList(),
+                  )).toList(),
               ),
             )
         ],

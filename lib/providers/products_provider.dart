@@ -42,6 +42,10 @@ class ProductProvider with ChangeNotifier {
     // ),
   ];
 
+  final String authToken;
+  final String userId;
+
+  ProductProvider(this.authToken,this.userId, this._items);
   var _showFavouritesOnly = false;
 
   List<Product> get items {
@@ -56,25 +60,29 @@ class ProductProvider with ChangeNotifier {
     return _items.firstWhere((element) => element.id == id);
   }
 
-  Future<void> fetchAndSetProducts() async {
-    final url = Uri.https(
-        'myshop-69fe2-default-rtdb.asia-southeast1.firebasedatabase.app',
-        '/products.json');
+  Future<void> fetchAndSetProducts([bool filterByUser = false]) async {
+    final filterString = filterByUser ? 'orderBy="userId"&equalTo="$userId"' : '';
+    var url = Uri.parse(
+        'https://myshop-69fe2-default-rtdb.asia-southeast1.firebasedatabase.app/products.json?auth=$authToken&$filterString');
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       final List<Product> loadedProducts = [];
-      if(extractedData == null){
+      if (extractedData == null) {
         return;
       }
+      url = Uri.parse(
+          'https://myshop-69fe2-default-rtdb.asia-southeast1.firebasedatabase.app/userFavourites/$userId.json?auth=$authToken');
+      final favouriteResponse = await http.get(url);
+      final favouriteData = json.decode(favouriteResponse.body);
       extractedData.forEach((prodID, prodData) {
         loadedProducts.add(Product(
             id: prodID,
             title: prodData['title'],
             description: prodData['description'],
-            price: double.parse(prodData['price']),
+            price: prodData['price'],
             imageUrl: prodData['imageUrl'],
-            isFavourite: prodData['isFavourite'] == true ? true : false ));
+            isFavourite: favouriteData == null ? false : favouriteData[prodID] ?? false ));
         _items = loadedProducts;
       });
       notifyListeners();
@@ -85,16 +93,15 @@ class ProductProvider with ChangeNotifier {
 
   Future<void> addProduct(Product product) async {
     try {
-      final url = Uri.https(
-          'myshop-69fe2-default-rtdb.asia-southeast1.firebasedatabase.app',
-          '/products.json');
+      final url = Uri.parse(
+          'https://myshop-69fe2-default-rtdb.asia-southeast1.firebasedatabase.app/products.json?auth=$authToken');
       final response = await http.post(url,
           body: json.encode({
             'title': product.title,
-            'price': product.price.toString(),
+            'price': product.price,
             'description': product.description,
             'imageUrl': product.imageUrl,
-            'isFavourite': product.isFavourite.toString()
+            'userId': userId
           }));
 
       final newProduct = Product(
@@ -108,7 +115,7 @@ class ProductProvider with ChangeNotifier {
       //_items.insert(0, newProduct); //at the beginning
       notifyListeners();
     } catch (error) {
-      print(error+" in add product");
+      print(error + " in add product");
       throw error;
     }
   }
@@ -116,15 +123,15 @@ class ProductProvider with ChangeNotifier {
   Future<void> updateProduct(String id, Product product) async {
     final prodIndex = _items.indexWhere((prod) => prod.id == id);
     if (prodIndex >= 0) {
-      final url = Uri.https(
-          'myshop-69fe2-default-rtdb.asia-southeast1.firebasedatabase.app',
-          '/products/$id.json');
-      http.patch(url, body: json.encode({
-        'title': product.title,
-        'price': product.price.toString(),
-        'description': product.description,
-        'imageUrl': product.imageUrl
-      }));
+      final url = Uri.parse(
+          'https://myshop-69fe2-default-rtdb.asia-southeast1.firebasedatabase.app/products/$id.json?auth=$authToken');
+      http.patch(url,
+          body: json.encode({
+            'title': product.title,
+            'price': product.price.toString(),
+            'description': product.description,
+            'imageUrl': product.imageUrl
+          }));
       _items[prodIndex] = product;
       notifyListeners();
     } else {
@@ -133,22 +140,20 @@ class ProductProvider with ChangeNotifier {
   }
 
   Future<void> deleteProduct(String id) async {
-    final url = Uri.https(
-        'myshop-69fe2-default-rtdb.asia-southeast1.firebasedatabase.app',
-        '/products/$id.json');
-    final existingProductIndex = _items.indexWhere((element) => element.id == id);
+    final url = Uri.parse(
+        'https://myshop-69fe2-default-rtdb.asia-southeast1.firebasedatabase.app/products/$id.json?auth=$authToken');
+    final existingProductIndex =
+        _items.indexWhere((element) => element.id == id);
     var existingProduct = _items[existingProductIndex];
     final response = await http.delete(url);
-    _items.removeAt(existingProductIndex );
+    _items.removeAt(existingProductIndex);
     notifyListeners();
-      if(response.statusCode>=400){
-        _items.insert(existingProductIndex, existingProduct);
-        notifyListeners();
-        throw HttpException("Could not delete product in deleteProduct function.");
-      }
-      existingProduct = null;
-
-
-
+    if (response.statusCode >= 400) {
+      _items.insert(existingProductIndex, existingProduct);
+      notifyListeners();
+      throw HttpException(
+          "Could not delete product in deleteProduct function.");
+    }
+    existingProduct = null;
   }
 }

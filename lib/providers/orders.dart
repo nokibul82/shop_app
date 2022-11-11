@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import './product.dart';
 import 'package:http/http.dart' as http;
 import './cart.dart';
 
@@ -19,30 +20,37 @@ class OrderItem {
 }
 
 class Orders with ChangeNotifier {
+  final String authToken;
   List<OrderItem> _orders = [];
+  final String userId;
+
+  Orders(this.authToken,this.userId,this._orders);
 
   List<OrderItem> get orders {
     return [..._orders];
   }
 
   Future<void> fetchAndSetOrders() async {
-    final url = Uri.https(
-        'myshop-69fe2-default-rtdb.asia-southeast1.firebasedatabase.app',
-        '/oders.json');
+    print("AuthToken : $authToken");
+    final url = Uri.parse('https://myshop-69fe2-default-rtdb.asia-southeast1.firebasedatabase.app/oders/$userId.json?auth=$authToken');
     final response = await http.get(url);
     final List<OrderItem> loadedOrders = [];
     final extractedData = json.decode(response.body) as Map<String, dynamic>;
-    if(extractedData == null){
+    if (extractedData == null) {
       return;
     }
-    extractedData.forEach((orderID, orderItem) {
+    extractedData.forEach((orderID, orderData) {
       loadedOrders.add(OrderItem(
           id: orderID,
-          total: orderItem['total'],
-          time: DateTime.parse(orderItem['time']),
-          products: (orderItem['products'] as List<dynamic>).map((item) {
-            CartModel(id: item['id'], title: item['title'], quantity: item['quantity'], price: item['price']);
-          }).toList()
+          total: orderData['total'],
+          products: (orderData['products'] as List<dynamic>).map((item) {
+            CartModel(
+                id: item["id"],
+                title: item["title"],
+                quantity: item["quantity"],
+                price: item["price"]);
+          }).toList(),
+          time: DateTime.parse(orderData['time'])
       ));
     });
     _orders = loadedOrders.reversed.toList();
@@ -50,9 +58,7 @@ class Orders with ChangeNotifier {
   }
 
   Future<void> addOrder(List<CartModel> cartProducts, double total) async {
-    final url = Uri.https(
-        'myshop-69fe2-default-rtdb.asia-southeast1.firebasedatabase.app',
-        '/oders.json');
+    final url = Uri.parse('https://myshop-69fe2-default-rtdb.asia-southeast1.firebasedatabase.app/oders/$userId.json?auth=$authToken');
     final dateTime = DateTime.now();
     final response = await http.post(url,
         body: json.encode({

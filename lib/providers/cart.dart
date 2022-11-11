@@ -47,7 +47,7 @@ class Cart with ChangeNotifier {
           productId,
           () => CartModel(
               id: DateTime.now().toString(),
-              title: title,
+              title: title.toString(),
               quantity: 1,
               price: price));
     }
