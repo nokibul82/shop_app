@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../screens/user_products_screen.dart';
 import '../screens/orders_screen.dart';
+import '../helpers/custom_route.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -19,7 +20,7 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             title: Text("Shop"),
             leading: Icon(Icons.shop),
-            onTap: (){
+            onTap: () {
               Navigator.of(context).pushReplacementNamed('/');
             },
           ),
@@ -27,23 +28,26 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             title: Text("Orders"),
             leading: Icon(Icons.payment),
-            onTap: (){
+            onTap: () {
               Navigator.of(context).pushReplacementNamed(OrdersScreen.routeName);
+              // Navigator.of(context).pushReplacement(
+              //     CustomRoute(builder: (ctx) => OrdersScreen()));
             },
           ),
           Divider(),
           ListTile(
             title: Text("Manage Products"),
             leading: Icon(Icons.edit),
-            onTap: (){
-              Navigator.of(context).pushReplacementNamed(UserProductsScreen.routeName);
+            onTap: () {
+              Navigator.of(context)
+                  .pushReplacementNamed(UserProductsScreen.routeName);
             },
           ),
           Divider(),
           ListTile(
             title: Text("Logout"),
             leading: Icon(Icons.logout),
-            onTap: (){
+            onTap: () {
               Navigator.of(context).pop();
               Navigator.of(context).pushReplacementNamed('/');
               Provider.of<Auth>(context, listen: false).logout();
