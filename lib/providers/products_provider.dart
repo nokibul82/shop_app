@@ -1,4 +1,4 @@
-import 'dart:io';
+
 
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -80,7 +80,7 @@ class ProductProvider with ChangeNotifier {
             id: prodID,
             title: prodData['title'],
             description: prodData['description'],
-            price: prodData['price'],
+            price: (prodData['price']).toDouble(),
             imageUrl: prodData['imageUrl'],
             isFavourite: favouriteData == null ? false : favouriteData[prodID] ?? false ));
         _items = loadedProducts;
@@ -98,7 +98,7 @@ class ProductProvider with ChangeNotifier {
       final response = await http.post(url,
           body: json.encode({
             'title': product.title,
-            'price': product.price,
+            'price': product.price.toDouble(),
             'description': product.description,
             'imageUrl': product.imageUrl,
             'userId': userId
@@ -108,7 +108,7 @@ class ProductProvider with ChangeNotifier {
           id: json.decode(response.body)['name'],
           title: product.title,
           description: product.description,
-          price: product.price,
+          price: product.price.toDouble(),
           imageUrl: product.imageUrl);
 
       _items.add(newProduct);
@@ -128,7 +128,7 @@ class ProductProvider with ChangeNotifier {
       http.patch(url,
           body: json.encode({
             'title': product.title,
-            'price': product.price.toString(),
+            'price': product.price.toDouble(),
             'description': product.description,
             'imageUrl': product.imageUrl
           }));
