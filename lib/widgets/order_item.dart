@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_complete_guide/providers/cart.dart';
 import 'package:intl/intl.dart';
 
 import '../providers/orders.dart' as ord;
@@ -19,8 +20,7 @@ class _OrderItemState extends State<OrderItem> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.order);
-    print(widget.order.products.length);
+    List<CartModel> itemList = widget.order.products;
     return Card(
       margin: EdgeInsets.all(10),
       child: Column(
@@ -30,21 +30,21 @@ class _OrderItemState extends State<OrderItem> {
             subtitle: Text(
               DateFormat('dd/MM/yyyy hh:mm').format(widget.order.time),
             ),
-            trailing: IconButton(
-              icon: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
-              onPressed: () {
-                setState(() {
-                  _expanded = !_expanded;
-                });
-              },
-            ),
+            // trailing: IconButton(
+            //   icon: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
+            //   onPressed: () {
+            //     setState(() {
+            //       _expanded = !_expanded;
+            //     });
+            //   },
+            // ),
           ),
           if (_expanded)
             Container(
               padding: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
-              height: min(widget.order.products.length * 20.0 + 10, 100),
+              height: min(itemList.length * 20.0 + 10, 100),
               child: ListView(
-                children: widget.order.products.map((prod) => Row(  // Here prod is does not contain anything unfortunately
+                children: itemList.map((prod) => Row(  // Here prod is does not contain anything unfortunately
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text(

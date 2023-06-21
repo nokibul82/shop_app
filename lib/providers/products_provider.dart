@@ -15,6 +15,7 @@ class ProductProvider with ChangeNotifier {
     //   price: 29.99,
     //   imageUrl:
     //       'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
+
     // ),
     // Product(
     //   id: 'p2',
@@ -61,7 +62,7 @@ class ProductProvider with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProducts([bool filterByUser = false]) async {
-    final filterString = filterByUser ? 'orderBy="userId"&equalTo="$userId"' : '';
+    final filterString = filterByUser ? 'orderBy="$userId"&equalTo="$userId"' : '';
     var url = Uri.parse(
         'https://myshop-69fe2-default-rtdb.asia-southeast1.firebasedatabase.app/products.json?auth=$authToken&$filterString');
     try {
@@ -80,7 +81,7 @@ class ProductProvider with ChangeNotifier {
             id: prodID,
             title: prodData['title'],
             description: prodData['description'],
-            price: (prodData['price']).toDouble(),
+            price: (prodData['price']),
             imageUrl: prodData['imageUrl'],
             isFavourite: favouriteData == null ? false : favouriteData[prodID] ?? false ));
         _items = loadedProducts;
